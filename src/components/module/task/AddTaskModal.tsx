@@ -1,4 +1,5 @@
 import { Button } from "@/components/ui/button";
+import { Calendar } from "@/components/ui/calendar";
 import {
   Dialog,
   DialogContent,
@@ -15,16 +16,40 @@ import {
   FormLabel,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
+import { cn } from "@/lib/utils";
+import { addTask } from "@/redux/features/task/taskSlice";
+import { useAppDispatch } from "@/redux/hook";
+import { ITask } from "@/types/task.types";
 import { DialogDescription } from "@radix-ui/react-dialog";
-import { useForm } from "react-hook-form";
+import { format } from "date-fns";
+import { CalendarIcon } from "lucide-react";
+import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 
 export function AddTaskModal() {
   const form = useForm();
 
-  const onSubmit = (data: unknown) => {
+  const dispatch = useAppDispatch();
+
+  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    const serializedData = {
+      ...data,
+      dueDate: data.dueDate ? data.dueDate.toISOString() : null,
+    };
     console.log(data);
+    dispatch(addTask(serializedData as ITask));
   };
   return (
     <Dialog>
@@ -66,39 +91,73 @@ export function AddTaskModal() {
             />
             <FormField
               control={form.control}
-              name="dueDate"
+              name="priority"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Due date</FormLabel>
-                  <FormControl>
-                    <Input {...field} value={field.value || ""} />
-                  </FormControl>
+                  <FormLabel>Priority</FormLabel>
+                  <Select
+                    onValueChange={field.onChange}
+                    defaultValue={field.value}
+                  >
+                    <FormControl>
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select priority" />
+                      </SelectTrigger>
+                    </FormControl>
+                    <SelectContent>
+                      <SelectItem value="High">High</SelectItem>
+                      <SelectItem value="Medium">Medium</SelectItem>
+                      <SelectItem value="Low">Low</SelectItem>
+                    </SelectContent>
+                  </Select>
                 </FormItem>
               )}
             />
+
             <FormField
               control={form.control}
-              name="priority"
-              render={() => (
-                <FormItem>
-                  <FormLabel>Priority</FormLabel>
-                  <FormControl>
-                    <Select>
-                      <SelectTrigger className="w-[180px]">
-                        <SelectValue placeholder="Theme" />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="light">Low</SelectItem>
-                        <SelectItem value="dark">Medium</SelectItem>
-                        <SelectItem value="system">High</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </FormControl>
+              name="dueDate"
+              render={({ field }) => (
+                <FormItem className="flex flex-col">
+                  <FormLabel>Due date</FormLabel>
+                  <Popover>
+                    <PopoverTrigger asChild>
+                      <FormControl>
+                        <Button
+                          variant={"outline"}
+                          className={cn(
+                            "pl-3 text-left font-normal",
+                            !field.value && "text-muted-foreground"
+                          )}
+                        >
+                          {field.value ? (
+                            format(field.value, "PPP")
+                          ) : (
+                            <span>Pick a date</span>
+                          )}
+                          <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                        </Button>
+                      </FormControl>
+                    </PopoverTrigger>
+                    <PopoverContent className="w-auto p-0" align="start">
+                      <Calendar
+                        mode="single"
+                        selected={field.value}
+                        onSelect={field.onChange}
+                        // disabled={(date) =>
+                        //   date > new Date() || date < new Date("1900-01-01")
+                        // }
+                        initialFocus
+                      />
+                    </PopoverContent>
+                  </Popover>
                 </FormItem>
               )}
             />
             <DialogFooter>
-              <Button type="submit">Save changes</Button>
+              <Button className="mt-4" type="submit">
+                Submit
+              </Button>
             </DialogFooter>
           </form>
         </Form>
