@@ -9,8 +9,12 @@ interface InitialState {
 const initialState: InitialState = {
   users: [
     {
-      id: "1",
+      id: "111",
       name: "Rakib",
+    },
+    {
+      id: "112",
+      name: "Rose",
     },
   ],
 };
