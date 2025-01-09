@@ -30,10 +30,7 @@ import {
 } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";
 import { cn } from "@/lib/utils";
-import { addTask } from "@/redux/features/task/taskSlice";
-import { selectUsers } from "@/redux/features/user/userSlice";
-import { useAppDispatch, useAppSelector } from "@/redux/hook";
-import { ITask } from "@/types/task.types";
+import { useCreateTaskMutation } from "@/redux/api/baseApi";
 import { DialogDescription } from "@radix-ui/react-dialog";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
@@ -43,19 +40,20 @@ import { FieldValues, SubmitHandler, useForm } from "react-hook-form";
 export function AddTaskModal() {
 
   const [open, setOpen] = useState(false);
-
-  const users = useAppSelector(selectUsers);
-  console.log(users);
   const form = useForm();
 
-  const dispatch = useAppDispatch();
+  const [ createTask] = useCreateTaskMutation();
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    const serializedData = {
+  // console.log(data);
+
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+
+    const taskData = {
       ...data,
-      dueDate: data.dueDate ? data.dueDate.toISOString() : null,
-    };
-    dispatch(addTask(serializedData as ITask));
+      isCompleted: false
+    }
+    await createTask(taskData).unwrap()
+    // console.log('submitted data', res);
     setOpen(false);
     form.reset();
   };
@@ -122,7 +120,7 @@ export function AddTaskModal() {
               )}
             />
 
-            <FormField
+            {/* <FormField
               control={form.control}
               name="assignedTo"
               render={({ field }) => (
@@ -147,7 +145,7 @@ export function AddTaskModal() {
                   </Select>
                 </FormItem>
               )}
-            />
+            /> */}
 
             <FormField
               control={form.control}

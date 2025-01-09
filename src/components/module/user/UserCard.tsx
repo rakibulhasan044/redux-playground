@@ -1,6 +1,4 @@
 import { Button } from "@/components/ui/button";
-import { deleteUser } from "@/redux/features/user/userSlice";
-import { useAppDispatch } from "@/redux/hook";
 import { IUser } from "@/types/user.types";
 import { Trash2 } from "lucide-react";
 
@@ -9,7 +7,6 @@ interface IProps {
 }
 
 export default function UserCard({ user }: IProps) {
-  const dispatch = useAppDispatch();
 
   return (
     <div className="border px-5 py-3 rounded-md">
@@ -19,7 +16,7 @@ export default function UserCard({ user }: IProps) {
           <Button
             variant={"link"}
             className="p-0 text-red-500"
-            onClick={() => dispatch(deleteUser(user.id))}
+            // onClick={() => dispatch(deleteUser(user.id))}
           >
             <Trash2 />
           </Button>
